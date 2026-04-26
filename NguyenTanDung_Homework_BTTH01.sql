@@ -95,3 +95,47 @@ insert into order_details (order_id, product_id, quantity, total_price) values
 update products
 set stock = stock - 5
 where id = 1;
+
+-- BTTH02
+-- yêu cầu 1: sản phẩm danh mục 'đồ uống', giá 10.000đ - 50.000đ, còn hàng
+select id, product_name, category, price, stock
+from products
+where category = 'đồ uống'
+  and price between 10000 and 50000
+  and stock > 0;
+
+-- yêu cầu 2: khách hàng họ 'nguyễn' hoặc địa chỉ ở 'hà nội'
+select id, full_name, phone, address, customer_type
+from customers
+where full_name like 'nguyen%'
+   or address like '%hà nội%';
+
+-- yêu cầu 3: danh sách đơn hàng kèm tên khách, mới nhất lên đầu
+select
+    o.id          as mã_đơn,
+    o.order_date  as ngày_mua,
+    o.status      as trạng_thái,
+    c.full_name   as tên_khách_hàng
+from orders o
+join customers c on o.customer_id = c.id
+order by o.order_date desc;
+
+-- yêu cầu 4: biên lai chi tiết hóa đơn (tên kh, ngày mua, tên sp, số lượng, đơn giá)
+select
+    c.full_name    as tên_khách_hàng,
+    o.order_date   as ngày_mua,
+    p.product_name as tên_sản_phẩm,
+    od.quantity    as số_lượng,
+    p.price        as đơn_giá
+from order_details od
+join orders   o on od.order_id   = o.id
+join customers c on o.customer_id = c.id
+join products  p on od.product_id = p.id
+order by o.id, p.product_name;
+
+-- yêu cầu 5: khách hàng chưa từng mua đơn hàng nào (gửi mã giảm giá)
+select id, full_name, phone, address, customer_type
+from customers
+where id not in (
+    select distinct customer_id from orders
+);
